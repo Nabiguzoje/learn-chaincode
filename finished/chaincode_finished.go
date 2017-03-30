@@ -40,7 +40,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
 
-	err := stub.PutState("hello_world", []byte(args[0]))
+	err := stub.PutState("properity1", []byte(args[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,33 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.Init(stub, "init", args)
 	} else if function == "write" {
 		return t.write(stub, args)
+	} else if function == "changeOwner" {
+		return t.changeOwner(stub, args)
 	}
+
 	fmt.Println("invoke did not find func: " + function)
 
 	return nil, errors.New("Received unknown function invocation: " + function)
+}
+
+// change owner - invoke function to change owner of the asset
+func (t *SimpleChaincode) changeOwner(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var asset, newowner string
+	var err error
+	fmt.Println("running write()")
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments")
+	}
+
+	asset = args[0] // the asset
+	// currentowner = args[1] // the curret owner (for verification)
+	newowner = args[1]                           // the new owner
+	err = stub.PutState(asset, []byte(newowner)) //update the owner of the asset
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
 
 // Query is our entry point for queries
